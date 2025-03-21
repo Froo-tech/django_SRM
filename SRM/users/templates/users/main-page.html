@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Main page</title>
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300i,400" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'users/css/main-page.css' %}?v=1.1" type="text/css">
+</head>
+<body>
+    <div class="container">
+        <a href="/users/account" class="card">
+            <div class="title">Account</div>
+            <div class="bar">
+                <div class="emptybar"></div>
+                <div class="filledbar"></div>
+            </div>
+            <div class="circle">
+                <svg version="1.1" xmlns="http://www.w3.org/2000/svg">
+                    <circle class="stroke" cx="60" cy="60" r="50"/>
+                </svg>
+            </div>
+        </a>
+        <a href="/users/register/" class="card">
+            <div class="title">Register</div>
+            <div class="bar">
+                <div class="emptybar"></div>
+                <div class="filledbar"></div>
+            </div>
+            <div class="circle">
+                <svg version="1.1" xmlns="http://www.w3.org/2000/svg">
+                    <circle class="stroke" cx="60" cy="60" r="50"/>
+                </svg>
+            </div>
+        </a>
+        <a href="/users/login" class="card">
+            <div class="title">Login</div>
+            <div class="bar">
+                <div class="emptybar"></div>
+                <div class="filledbar"></div>
+            </div>
+            <div class="circle">
+                <svg version="1.1" xmlns="http://www.w3.org/2000/svg">
+                    <circle class="stroke" cx="60" cy="60" r="50"/>
+                </svg>
+            </div>
+        </a>
+    </div>
+</body>
+</html>

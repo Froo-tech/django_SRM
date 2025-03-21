@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Account</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'users/css/account.css' %}?v=1.1" type="text/css">
+</head>
+<body>
+    <div class="con-is_true">
+        {% if email %}
+            <div class="return_data">
+                <p>Username: {{ username }}</p>
+                <p>Email: {{ email }}</p>
+            </div>
+            <div class="order">
+                <div class="con-form">
+                    <form method="post" action="{% url 'users:/orders/' %}">
+                        {% csrf_token %}
+
+                        <div>
+                            <label for="name">Название поставщика:</label>
+                            <input type="text" id="name" name="name" required>
+                        </div>
+
+                        <div>
+                            <label for="contact">Контактный номер:</label>
+                            <input type="text" id="contact" name="contact" maxlength="15" pattern="\d*" required>
+                        </div>
+
+                        <div>
+                            <label for="category">Категория:</label>
+                            <input type="text" id="category" name="category" maxlength="40" required>
+                        </div>
+
+                        <button type="submit">Сохранить</button>
+                    </form>
+                </div>
+            </div>
+            <a href="{% url 'orders' %}">Orders</a>  <!-- Updated link to orders -->
+            <a href="{% url 'logout' %}">Выйти</a>
+        {% endif %}
+    </div>
+    {% if anom %}
+    <div class="error-con" role="alert" aria-live="assertive">
+        <i class="fas fa-exclamation-circle"></i> {{ anom }}
+    </div>
+    <a href="{% url 'login' %}">Войти</a>
+    {% endif %}
+</body>
+</html>
