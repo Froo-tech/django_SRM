@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Заказы</title>
+    <style>
+        #orderForm {
+            display: none;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<button onclick="showOrderForm()">Добавить заказ</button>
+
+<div id="orderForm">
+    <form method="post" action="{% url 'users:orders_profile' name=name %}">
+        {% csrf_token %}
+        <label for="supplier_name">Имя поставщика:</label><br>
+        <input type="text" id="supplier_name" name="supplier_name" value="{{ supplier_name }}"><br><br>
+
+        <label for="start_date">Дата начала:</label><br>
+        <input type="date" id="start_date" name="start_date"><br><br>
+
+        <label for="end_date">Дата окончания:</label><br>
+        <input type="date" id="end_date" name="end_date"><br><br>
+
+        <label for="state">Статус:</label><br>
+        <input type="text" id="state" name="state"><br><br>
+
+        <label for="payment_state">Статус оплаты:</label><br>
+        <input type="text" id="payment_state" name="payment_state"><br><br>
+
+        <button type="submit">Отправить</button>
+    </form>
+</div>
+
+<script>
+    function showOrderForm() {
+        document.getElementById('orderForm').style.display = 'block';
+    }
+</script>
+
+</body>
+</html>

@@ -5,6 +5,27 @@
     <title>Title</title>
 </head>
 <body>
-
+        <h2>Данные пользователя</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Имя поставщика</th>
+                    <th>Контакт</th>
+                    <th>Категория</th>
+                    <th>Все заказы поставщика</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for data in all_data %}
+                <tr>
+                    <td>{{ data.name }}</td>
+                    <td>{{ data.contact }}</td>
+                    <td>{{ data.category }}</td>
+                    <td><a href="{{ data.url }}">Ссылка</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </body>
 </html>

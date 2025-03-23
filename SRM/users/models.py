@@ -16,17 +16,22 @@ class Images(models.Model):
     img = models.ImageField(upload_to='article', height_field=100, width_field=100)
 
 class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    username = models.TextField(default="None")
     tel = models.CharField(max_length=15)
 
 class Suppliers(models.Model):
+    username = models.TextField(default="None")
     name = models.TextField()
     contact = models.CharField(max_length=15)
     category = models.CharField(max_length=40)
+    url = models.TextField(default="None")
 
 class Order(models.Model):
-    supplier_name = models.TextField()
-    start_date = models.DateField()
-    end_date = models.TextField()
-    payment_terms = models.TextField()
+    username = models.TextField(default="None")
+    supplier_name = models.TextField(default="none")
+    start_date = models.DateField(default="None")
+    end_date = models.TextField(default="None")
+    state = models.CharField(max_length=40, default="None")
+    payment_state = models.TextField(default="None")
+
 

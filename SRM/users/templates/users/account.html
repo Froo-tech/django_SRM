@@ -16,7 +16,7 @@
             </div>
             <div class="order">
                 <div class="con-form">
-                    <form method="post" action="{% url 'users:/orders/' %}">
+                    <form method="post" action="{% url 'users:orders' %}">
                         {% csrf_token %}
 
                         <div>
@@ -38,15 +38,15 @@
                     </form>
                 </div>
             </div>
-            <a href="{% url 'orders' %}">Orders</a>  <!-- Updated link to orders -->
-            <a href="{% url 'logout' %}">Выйти</a>
+            <a href="{% url 'users:orders' %}">Orders</a>  <!-- Updated link to orders -->
+            <a href="{% url 'users:logout' %}">Выйти</a>
         {% endif %}
     </div>
     {% if anom %}
     <div class="error-con" role="alert" aria-live="assertive">
         <i class="fas fa-exclamation-circle"></i> {{ anom }}
     </div>
-    <a href="{% url 'login' %}">Войти</a>
+    <a href="{% url 'users:login' %}">Войти</a>
     {% endif %}
 </body>
 </html>

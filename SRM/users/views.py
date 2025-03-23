@@ -4,9 +4,52 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth import logout as auth_logout
 from .models import *
 
+def orders_profile(request, name):
+    context = {'name': name}
 
+    if request.method == "POST":
+        supplier_name = request.POST.get('supplier_name')
+        start_date = request.POST.get('start_date')
+        end_date = request.POST.get('end_date')
+        state = request.POST.get('state')
+        payment_state = request.POST.get('payment_state')
+
+
+        if supplier_name and start_date and end_date and state and payment_state:
+            try:
+
+                order = Order(
+                    supplier_name=supplier_name,
+                    start_date=start_date,
+                    end_date=end_date,
+                    state=state,
+                    payment_state=payment_state
+                )
+                order.save()
+            except:
+                print('ds')
+
+    return render(request, 'users/orders-profile.html', context)
 def orders(request):
-    return render(request, "users/orders.html")
+    context = {}
+    if request.method == "POST":
+        category = request.POST.get('category')
+        contact = request.POST.get('contact')
+        name = request.POST.get('name')
+        suppliers = Suppliers()
+        suppliers.url = f"/users/orders/{name}/"
+        suppliers.name = name
+        suppliers.contact = contact
+        suppliers.category = category
+        suppliers.username = request.user.username
+        suppliers.save()
+
+    all_data = Suppliers.objects.filter(username=request.user.username)
+    context = {
+        "all_data": all_data,
+
+    }
+    return render(request, "users/orders.html", context)
 
 def user_login(request):
     if request.method == "POST":
@@ -67,7 +110,7 @@ def register(request):
 
 def logout(request):
     auth_logout(request)
-    return redirect('/users/login/')  # Changed to redirect to login page
+    return redirect('/users/login/')
 
 def main(request):
     return render(request, 'users/main-page.html')
