@@ -3,10 +3,9 @@ import hashlib
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import logout as auth_logout
 from .models import *
+from django.contrib import messages
 
 def orders_profile(request, name):
-    context = {'name': name}
-
     if request.method == "POST":
         supplier_name = request.POST.get('supplier_name')
         start_date = request.POST.get('start_date')
@@ -14,20 +13,27 @@ def orders_profile(request, name):
         state = request.POST.get('state')
         payment_state = request.POST.get('payment_state')
 
-
         if supplier_name and start_date and end_date and state and payment_state:
             try:
-
                 order = Order(
                     supplier_name=supplier_name,
                     start_date=start_date,
                     end_date=end_date,
                     state=state,
-                    payment_state=payment_state
+                    payment_state=payment_state,
+                    username=request.user.username,
                 )
                 order.save()
-            except:
-                print('ds')
+                messages.success(request, 'Заказ успешно сохранён!')
+                return redirect('users:orders_profile', name=name)
+            except Exception as e:
+                messages.error(request, f'Ошибка при сохранении заказа: {e}')
+
+    all_data = Order.objects.filter(username=request.user.username, supplier_name=name)
+    context = {
+        'name': name,
+        'all_data': all_data
+    }
 
     return render(request, 'users/orders-profile.html', context)
 def orders(request):

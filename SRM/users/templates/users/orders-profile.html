@@ -13,13 +13,18 @@
 </head>
 <body>
 
-<button onclick="showOrderForm()">Добавить заказ</button>
+<button onclick="showOrderForm()">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+        <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
+    </svg>
+    Добавить заказ
+</button>
 
-<div id="orderForm">
+<div id="orderForm" {% if not request.method == "POST" %}style="display: none;"{% endif %}>
     <form method="post" action="{% url 'users:orders_profile' name=name %}">
         {% csrf_token %}
         <label for="supplier_name">Имя поставщика:</label><br>
-        <input type="text" id="supplier_name" name="supplier_name" value="{{ supplier_name }}"><br><br>
+        <input type="text" id="supplier_name" name="supplier_name" value="{{ name }}"><br><br>
 
         <label for="start_date">Дата начала:</label><br>
         <input type="date" id="start_date" name="start_date"><br><br>
@@ -37,9 +42,41 @@
     </form>
 </div>
 
+<div class="show-table">
+    <table>
+        <thead>
+            <tr>
+                <th>Имя пользователя</th>
+                <th>Имя поставщика</th>
+                <th>Дата заказа</th>
+                <th>Дата получения</th>
+                <th>Статус</th>
+                <th>Платежный статус</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for data in all_data %}
+            <tr>
+                <td>{{ data.username }}</td>
+                <td>{{ name }}</td>
+                <td>{{ data.start_date|date:"Y-m-d" }}</td>
+                <td>{{ data.end_date|date:"Y-m-d" }}</td>
+                <td>{{ data.state }}</td>
+                <td>{{ data.payment_state }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
 <script>
     function showOrderForm() {
-        document.getElementById('orderForm').style.display = 'block';
+        var orderForm = document.getElementById('orderForm');
+        if (orderForm.style.display === 'block') {
+            orderForm.style.display = 'none';
+        } else {
+            orderForm.style.display = 'block';
+        }
     }
 </script>
 
