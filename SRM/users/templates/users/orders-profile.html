@@ -5,80 +5,187 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Заказы</title>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .add-order-btn {
+            background: #5cb85c;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        .add-order-btn:hover {
+            background: #4cae4c;
+        }
         #orderForm {
             display: none;
             margin-top: 20px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 5px;
+            margin-bottom: 30px;
+        }
+        #orderForm label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        #orderForm input[type="text"],
+        #orderForm input[type="date"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        #orderForm button[type="submit"] {
+            background: #5cb85c;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        #orderForm button[type="submit"]:hover {
+            background: #4cae4c;
+        }
+        .show-table {
+            width: 100%;
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table th, table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        table tr:hover {
+            background-color: #f5f5f5;
+        }
+        table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .state-pending {
+            color: #f0ad4e;
+            font-weight: bold;
+        }
+        .state-completed {
+            color: #5cb85c;
+            font-weight: bold;
+        }
+        .payment-pending {
+            color: #d9534f;
+            font-weight: bold;
+        }
+        .payment-paid {
+            color: #5cb85c;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
+    <div class="container">
+        <h1>Управление заказами</h1>
 
-<button onclick="showOrderForm()">
-    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
-        <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
-    </svg>
-    Добавить заказ
-</button>
+        <button class="add-order-btn" onclick="showOrderForm()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+                <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
+            </svg>
+            Добавить заказ
+        </button>
 
-<div id="orderForm" {% if not request.method == "POST" %}style="display: none;"{% endif %}>
-    <form method="post" action="{% url 'users:orders_profile' name=name %}">
-        {% csrf_token %}
-        <label for="supplier_name">Имя поставщика:</label><br>
-        <input type="text" id="supplier_name" name="supplier_name" value="{{ name }}"><br><br>
+        <div id="orderForm" {% if not request.method == "POST" %}style="display: none;"{% endif %}>
+            <form method="post" action="{% url 'users:orders_profile' name=name %}">
+                {% csrf_token %}
+                <label for="supplier_name">Имя поставщика:</label>
+                <input type="text" id="supplier_name" name="supplier_name" value="{{ name }}" readonly>
 
-        <label for="start_date">Дата начала:</label><br>
-        <input type="date" id="start_date" name="start_date"><br><br>
+                <label for="start_date">Дата начала:</label>
+                <input type="date" id="start_date" name="start_date" required>
 
-        <label for="end_date">Дата окончания:</label><br>
-        <input type="date" id="end_date" name="end_date"><br><br>
+                <label for="end_date">Дата окончания:</label>
+                <input type="date" id="end_date" name="end_date" required>
 
-        <label for="state">Статус:</label><br>
-        <input type="text" id="state" name="state"><br><br>
+                <label for="state">Статус:</label>
+                <input type="text" id="state" name="state" placeholder="Например, 'В обработке'" required>
 
-        <label for="payment_state">Статус оплаты:</label><br>
-        <input type="text" id="payment_state" name="payment_state"><br><br>
+                <label for="payment_state">Статус оплаты:</label>
+                <input type="text" id="payment_state" name="payment_state" placeholder="Например, 'Оплачено'" required>
 
-        <button type="submit">Отправить</button>
-    </form>
-</div>
+                <button type="submit">Создать заказ</button>
+            </form>
+        </div>
 
-<div class="show-table">
-    <table>
-        <thead>
-            <tr>
-                <th>Имя пользователя</th>
-                <th>Имя поставщика</th>
-                <th>Дата заказа</th>
-                <th>Дата получения</th>
-                <th>Статус</th>
-                <th>Платежный статус</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for data in all_data %}
-            <tr>
-                <td>{{ data.username }}</td>
-                <td>{{ name }}</td>
-                <td>{{ data.start_date|date:"Y-m-d" }}</td>
-                <td>{{ data.end_date|date:"Y-m-d" }}</td>
-                <td>{{ data.state }}</td>
-                <td>{{ data.payment_state }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
+        <div class="show-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Имя пользователя</th>
+                        <th>Имя поставщика</th>
+                        <th>Дата заказа</th>
+                        <th>Дата получения</th>
+                        <th>Статус</th>
+                        <th>Платежный статус</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for data in all_data %}
+                    <tr>
+                        <td>{{ data.username }}</td>
+                        <td>{{ name }}</td>
+                        <td>{{ data.start_date|date:"Y-m-d" }}</td>
+                        <td>{{ data.end_date|date:"Y-m-d" }}</td>
+                        <td class="state-{{ data.state|lower }}">{{ data.state }}</td>
+                        <td class="payment-{{ data.payment_state|lower }}">{{ data.payment_state }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 
-<script>
-    function showOrderForm() {
-        var orderForm = document.getElementById('orderForm');
-        if (orderForm.style.display === 'block') {
-            orderForm.style.display = 'none';
-        } else {
-            orderForm.style.display = 'block';
+    <script>
+        function showOrderForm() {
+            var orderForm = document.getElementById('orderForm');
+            if (orderForm.style.display === 'block') {
+                orderForm.style.display = 'none';
+            } else {
+                orderForm.style.display = 'block';
+            }
         }
-    }
-</script>
-
+    </script>
 </body>
 </html>
