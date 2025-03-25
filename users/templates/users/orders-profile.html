@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление заказами</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        .add-order-btn {
+            background: #5cb85c;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 16px;
+            margin-bottom: 25px;
+            transition: all 0.3s;
+        }
+        .add-order-btn:hover {
+            background: #4cae4c;
+            transform: translateY(-2px);
+        }
+        #orderForm {
+            display: none;
+            margin: 25px 0;
+            padding: 25px;
+            background: #f9f9f9;
+            border-radius: 5px;
+            border-left: 4px solid #5cb85c;
+            animation: fadeIn 0.3s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        #orderForm label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        #orderForm input[type="text"],
+        #orderForm input[type="date"],
+        #orderForm select {
+            width: 100%;
+            padding: 10px 15px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 15px;
+        }
+        #orderForm input:focus,
+        #orderForm select:focus {
+            border-color: #5cb85c;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(92, 184, 92, 0.2);
+        }
+        #orderForm button[type="submit"] {
+            background: #5cb85c;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            transition: all 0.3s;
+        }
+        #orderForm button[type="submit"]:hover {
+            background: #4cae4c;
+        }
+        .show-table {
+            width: 100%;
+            overflow-x: auto;
+            margin-top: 30px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+        }
+        table th, table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+        }
+        table tr:hover {
+            background-color: #f5f5f5;
+        }
+        table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .state-в обработке {
+            color: #f0ad4e;
+            font-weight: bold;
+        }
+        .state-выполнен {
+            color: #5cb85c;
+            font-weight: bold;
+        }
+        .state-отменён {
+            color: #d9534f;
+            font-weight: bold;
+        }
+        .state-доставка {
+            color: #5bc0de;
+            font-weight: bold;
+        }
+        .payment-оплачено {
+            color: #5cb85c;
+            font-weight: bold;
+        }
+        .payment-не оплачено {
+            color: #d9534f;
+            font-weight: bold;
+        }
+        .payment-частично оплачено {
+            color: #f0ad4e;
+            font-weight: bold;
+        }
+        .payment-возврат {
+            color: #d9534f;
+            font-weight: bold;
+        }
+        .action-btns {
+            display: flex;
+            gap: 8px;
+        }
+        .action-btn {
+            padding: 6px 10px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .edit-btn {
+            background: #f0ad4e;
+            color: white;
+        }
+        .delete-btn {
+            background: #d9534f;
+            color: white;
+        }
+        .action-btn:hover {
+            opacity: 0.9;
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            table th, table td {
+                padding: 12px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><i class="fas fa-clipboard-list"></i> Управление заказами</h1>
+
+        <button class="add-order-btn" onclick="showOrderForm()">
+            <i class="fas fa-plus"></i>
+            Добавить заказ
+        </button>
+
+        <div id="orderForm" {% if not request.method == "POST" %}style="display: none;"{% endif %}>
+            <form method="post" action="{% url 'users:orders_profile' name=name %}">
+                {% csrf_token %}
+                <label for="supplier_name"><i class="fas fa-truck"></i> Имя поставщика:</label>
+                <input type="text" id="supplier_name" name="supplier_name" value="{{ name }}" readonly>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                    <div>
+                        <label for="start_date"><i class="far fa-calendar-alt"></i> Дата начала:</label>
+                        <input type="date" id="start_date" name="start_date" required>
+                    </div>
+                    <div>
+                        <label for="end_date"><i class="far fa-calendar-check"></i> Дата окончания:</label>
+                        <input type="date" id="end_date" name="end_date" required>
+                    </div>
+                </div>
+
+                <label for="state"><i class="fas fa-info-circle"></i> Статус:</label>
+                <select id="state" name="state" required>
+                    <option value="" disabled selected>Выберите статус</option>
+                    <option value="В обработке">В обработке</option>
+                    <option value="Выполнен">Выполнен</option>
+                    <option value="Отменён">Отменён</option>
+                    <option value="Доставка">Доставка</option>
+                </select>
+
+                <label for="payment_state"><i class="fas fa-money-bill-wave"></i> Статус оплаты:</label>
+                <select id="payment_state" name="payment_state" required>
+                    <option value="" disabled selected>Выберите статус оплаты</option>
+                    <option value="Оплачено">Оплачено</option>
+                    <option value="Не оплачено">Не оплачено</option>
+                    <option value="Частично оплачено">Частично оплачено</option>
+                    <option value="Возврат">Возврат</option>
+                </select>
+
+                <button type="submit"><i class="fas fa-save"></i> Создать заказ</button>
+            </form>
+        </div>
+
+        <div class="show-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th><i class="fas fa-user"></i> Имя пользователя</th>
+                        <th><i class="fas fa-truck"></i> Имя поставщика</th>
+                        <th><i class="far fa-calendar-alt"></i> Дата заказа</th>
+                        <th><i class="far fa-calendar-check"></i> Дата получения</th>
+                        <th><i class="fas fa-info-circle"></i> Статус</th>
+                        <th><i class="fas fa-money-bill-wave"></i> Платежный статус</th>
+                        <th><i class="fas fa-cog"></i> Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for data in all_data %}
+                    <tr>
+                        <td>{{ data.username }}</td>
+                        <td>{{ name }}</td>
+                        <td>{{ data.start_date|date:"Y-m-d" }}</td>
+                        <td>{{ data.end_date|date:"Y-m-d" }}</td>
+                        <td class="state-{{ data.state|lower }}">{{ data.state }}</td>
+                        <td class="payment-{{ data.payment_state|lower }}">{{ data.payment_state }}</td>
+                        <td>
+                            <div class="action-btns">
+                                <button class="action-btn edit-btn" onclick="editOrder('{{ data.id }}')">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="action-btn delete-btn" onclick="deleteOrder('{{ data.id }}')">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function showOrderForm() {
+            const orderForm = document.getElementById('orderForm');
+            orderForm.style.display = orderForm.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function editOrder(orderId) {
+            alert(`Редактирование заказа с ID: ${orderId}`);
+            // Реальная логика редактирования
+        }
+
+        function deleteOrder(orderId) {
+            if (confirm('Вы уверены, что хотите удалить этот заказ?')) {
+                alert(`Удаление заказа с ID: ${orderId}`);
+                // Реальная логика удаления
+            }
+        }
+
+        // Установка минимальной даты окончания как даты начала
+        document.getElementById('start_date').addEventListener('change', function() {
+            const endDateInput = document.getElementById('end_date');
+            endDateInput.min = this.value;
+            if (endDateInput.value && endDateInput.value < this.value) {
+                endDateInput.value = this.value;
+            }
+        });
+    </script>
+</body>
+</html>
