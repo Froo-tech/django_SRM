@@ -35,5 +35,5 @@
 
 1. Клонировать репозиторий:
    ```bash
-   git clone https://github.com/ваш-репозиторий/srm-system.git
-   cd srm-system
+   git clone https://github.com/Froo-tech/django_SRM/
+   ```
