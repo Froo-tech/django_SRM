@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление заказами</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #5cb85c;
+            --error: #d9534f;
+            --warning: #f0ad4e;
+            --info: #5bc0de;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .add-order-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 16px;
+            margin-bottom: 25px;
+            transition: all 0.3s;
+        }
+
+        .add-order-btn:hover {
+            background: #4cae4c;
+            transform: translateY(-2px);
+        }
+
+        #orderForm {
+            display: none;
+            margin: 25px 0;
+            padding: 25px;
+            background: #f9f9f9;
+            border-radius: 5px;
+            border-left: 4px solid var(--primary);
+            animation: fadeIn 0.3s;
+        }
+        .file-upload-input {
+            display: none;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        select {
+            width: 100%;
+            padding: 10px 15px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 15px;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(92, 184, 92, 0.2);
+        }
+
+        button[type="submit"] {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            transition: all 0.3s;
+        }
+
+        button[type="submit"]:hover {
+            background: #4cae4c;
+        }
+
+        .file-upload-label {
+            display: block;
+            padding: 15px;
+            border: 2px dashed #ddd;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+
+        .file-upload-label:hover {
+            border-color: var(--primary);
+            background: rgba(92, 184, 92, 0.1);
+        }
+
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            background: #f8f9fa;
+            margin-bottom: 5px;
+            border-radius: 4px;
+        }
+
+        .file-remove {
+            cursor: pointer;
+            color: #666;
+            padding-left: 10px;
+        }
+
+        .error-messages {
+            color: var(--error);
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8d7da;
+            border-radius: 4px;
+        }
+
+        .show-table {
+            width: 100%;
+            overflow-x: auto;
+            margin-top: 30px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+        }
+
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        /* Обновленные стили для состояний */
+        .state-в-обработке, .state-v-obrabotke {
+            color: var(--warning);
+            font-weight: bold;
+        }
+        .state-выполнен, .state-vypolnen {
+            color: var(--primary);
+            font-weight: bold;
+        }
+        .state-отменён, .state-otmenyon, .state-otmenen {
+            color: var(--error);
+            font-weight: bold;
+        }
+        .state-доставка, .state-dostavka {
+            color: var(--info);
+            font-weight: bold;
+        }
+
+        .payment-оплачено, .payment-oplacheno {
+            color: var(--primary);
+        }
+        .payment-не-оплачено, .payment-ne-oplacheno {
+            color: var(--error);
+        }
+        .payment-частично-оплачено, .payment-chastichno-oplacheno {
+            color: var(--warning);
+        }
+        .payment-возврат, .payment-vozvrat {
+            color: var(--error);
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            padding: 6px 10px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .edit-btn {
+            background: var(--warning);
+            color: white;
+        }
+
+        .delete-btn {
+            background: var(--error);
+            color: white;
+        }
+
+        .file-btn {
+            background: var(--info);
+            color: white;
+        }
+
+        .files-popup {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .files-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .files-list {
+            margin-top: 15px;
+        }
+
+        .file-link {
+            display: block;
+            padding: 10px;
+            margin-bottom: 5px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            color: #333;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .file-link:hover {
+            background: #e9ecef;
+        }
+
+        .close-btn {
+            float: right;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            th, td {
+                padding: 12px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><i class="fas fa-clipboard-list"></i> Управление заказами</h1>
+
+        <button class="add-order-btn" onclick="showOrderForm()">
+            <i class="fas fa-plus"></i>
+            Добавить заказ
+        </button>
+
+        <div id="orderForm" style="display: none;">
+            <form method="post" action="{% url 'users:orders_profile' name=name %}" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <label for="supplier_name"><i class="fas fa-truck"></i> Имя поставщика:</label>
+                <input type="text" id="supplier_name" name="supplier_name" value="{{ name }}" readonly>
+
+                <div class="form-grid">
+                    <div>
+                        <label for="start_date"><i class="far fa-calendar-alt"></i> Дата начала:</label>
+                        <input type="date" id="start_date" name="start_date" required>
+                    </div>
+
+                    <div>
+                        <label for="order_type">Что заказано:</label>
+                        <input type="text" id="order_type" name="order_type" required>
+                    </div>
+
+                    <div>
+                        <label for="end_date"><i class="far fa-calendar-check"></i> Дата окончания:</label>
+                        <input type="date" id="end_date" name="end_date" required>
+                    </div>
+                </div>
+
+                <label class="form-label">Прикрепить файлы</label>
+                <label for="file-upload-input" class="file-upload-label">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <span>Перетащите файлы сюда или нажмите для выбора</span>
+                    <input type="file" id="file-upload-input" class="file-upload-input" multiple name="files">
+                </label>
+                <div class="file-list" id="file-list"></div>
+
+                <label for="state"><i class="fas fa-info-circle"></i> Статус:</label>
+                <select id="state" name="state" required>
+                    <option value="" disabled selected>Выберите статус</option>
+                    <option value="В обработке">В обработке</option>
+                    <option value="Выполнен">Выполнен</option>
+                    <option value="Отменён">Отменён</option>
+                    <option value="Доставка">Доставка</option>
+                </select>
+
+                <label for="payment_state"><i class="fas fa-money-bill-wave"></i> Статус оплаты:</label>
+                <select id="payment_state" name="payment_state" required>
+                    <option value="" disabled selected>Выберите статус оплаты</option>
+                    <option value="Оплачено">Оплачено</option>
+                    <option value="Не оплачено">Не оплачено</option>
+                    <option value="Частично оплачено">Частично оплачено</option>
+                    <option value="Возврат">Возврат</option>
+                </select>
+
+                <button type="submit"><i class="fas fa-save"></i> Создать заказ</button>
+            </form>
+        </div>
+
+        <div class="show-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th><i class="fas fa-user"></i> Пользователь</th>
+                        <th><i class="fas fa-truck"></i> Поставщик</th>
+                        <th><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-archive-fill" viewBox="0 0 16 16"><path d="M12.643 15C13.979 15 15 13.845 15 12.5V5H1v7.5C1 13.845 2.021 15 3.357 15zM5.5 7h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1 0-1M.8 1a.8.8 0 0 0-.8.8V3a.8.8 0 0 0 .8.8h14.4A.8.8 0 0 0 16 3V1.8a.8.8 0 0 0-.8-.8z"/></svg> Что заказано</th>
+                        <th><i class="far fa-calendar-alt"></i> Начало</th>
+                        <th><i class="far fa-calendar-check"></i> Окончание</th>
+                        <th><i class="fas fa-info-circle"></i> Статус</th>
+                        <th><i class="fas fa-money-bill-wave"></i> Оплата</th>
+                        <th><i class="fas fa-file"></i> Файл</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for data in orders_data %}
+                    <tr>
+                        <td>{{ data.order.username }}</td>
+                        <td>{{ name }}</td>
+                        <td>{{ data.order.order_type }}</td>
+                        <td>{{ data.order.start_date|date:"Y-m-d" }}</td>
+                        <td>{{ data.order.end_date|date:"Y-m-d" }}</td>
+                        <td class="state-{{ data.order.state|slugify }}" data-state="{{ data.order.state }}">
+                            {{ data.order.state }}
+                        </td>
+                        <td class="payment-{{ data.order.payment_state|slugify }}" data-payment="{{ data.order.payment_state }}">
+                            {{ data.order.payment_state }}
+                        </td>
+                        <td>
+                            {% if data.main_file_url %}
+                            <a href="{{ data.main_file_url }}" target="_blank" download title="{{ data.main_file_name }}">
+                                <i class="fas fa-file-download"></i> Скачать
+                            </a>
+                            {% else %}
+                            Нет файла
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" style="text-align: center;">Нет данных о заказах</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Попап для отображения файлов -->
+    <div id="filesPopup" class="files-popup">
+        <div class="files-content">
+            <span class="close-btn" onclick="closeFilesPopup()">&times;</span>
+            <h3>Файлы заказа</h3>
+            <div class="files-list" id="filesListContainer"></div>
+        </div>
+    </div>
+
+    <!-- Скрытый элемент с данными заказов -->
+    <script id="orders-data" type="application/json">
+        {{ orders_data_json|safe }}
+    </script>
+
+    <script>
+        // Функция для получения CSRF токена
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Управление формой
+        function showOrderForm() {
+            const orderForm = document.getElementById('orderForm');
+            orderForm.style.display = orderForm.style.display === 'block' ? 'none' : 'block';
+        }
+
+        // Обработка файлов
+        const fileInput = document.getElementById('file-upload-input');
+        const fileList = document.getElementById('file-list');
+        let files = [];
+
+        fileInput.addEventListener('change', updateFileList);
+
+        function updateFileList() {
+            files = Array.from(fileInput.files);
+            renderFileList();
+        }
+
+        function renderFileList() {
+            fileList.innerHTML = files.map((file, index) => `
+                <div class="file-item">
+                    <span><i class="fas fa-file-alt"></i> ${file.name}</span>
+                    <span class="file-remove" onclick="removeFile(${index})">
+                        <i class="fas fa-times"></i>
+                    </span>
+                </div>
+            `).join('');
+        }
+
+        function removeFile(index) {
+            files.splice(index, 1);
+            const dt = new DataTransfer();
+            files.forEach(file => dt.items.add(file));
+            fileInput.files = dt.files;
+            renderFileList();
+        }
+
+        // Drag and Drop
+        const uploadLabel = document.querySelector('.file-upload-label');
+
+        uploadLabel.addEventListener('dragover', e => {
+            e.preventDefault();
+            uploadLabel.style.borderColor = 'var(--primary)';
+        });
+
+        uploadLabel.addEventListener('dragleave', () => {
+            uploadLabel.style.borderColor = '#ddd';
+        });
+
+        uploadLabel.addEventListener('drop', e => {
+            e.preventDefault();
+            uploadLabel.style.borderColor = '#ddd';
+            fileInput.files = e.dataTransfer.files;
+            updateFileList();
+        });
+
+        // Валидация дат
+        document.getElementById('start_date').addEventListener('change', function() {
+            const endDate = document.getElementById('end_date');
+            endDate.min = this.value;
+            if (endDate.value && endDate.value < this.value) {
+                endDate.value = this.value;
+            }
+        });
+
+        // Установка минимальной даты при загрузке
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('start_date').min = today;
+
+            // Принудительное применение стилей к уже загруженным данным
+            applyStateStyles();
+        });
+
+        // Функция для принудительного применения стилей состояний
+        function applyStateStyles() {
+            document.querySelectorAll('[data-state]').forEach(el => {
+                const state = el.getAttribute('data-state');
+                const slug = slugifyString(state);
+                el.className = `state-${slug}`;
+            });
+
+            document.querySelectorAll('[data-payment]').forEach(el => {
+                const payment = el.getAttribute('data-payment');
+                const slug = slugifyString(payment);
+                el.className = `payment-${slug}`;
+            });
+        }
+
+        // Функция для преобразования строки в slug-формат
+        function slugifyString(str) {
+            return str.toLowerCase()
+                .replace(/\s+/g, '-')  // Заменяем пробелы на дефисы
+                .replace(/[^\w\-]+/g, '') // Удаляем все не-слова
+                .replace(/\-\-+/g, '-') // Удаляем двойные дефисы
+                .replace(/^-+/, '') // Удаляем дефисы с начала строки
+                .replace(/-+$/, ''); // Удаляем дефисы с конца строки
+        }
+
+        // Подтверждение удаления
+        function confirmDelete(orderId) {
+            if (confirm('Вы уверены, что хотите удалить этот заказ?')) {
+                deleteOrder(orderId);
+            }
+        }
+
+        // Редактирование заказа
+        function editOrder(orderId) {
+            console.log('Редактирование заказа:', orderId);
+        }
+
+        // Показ файлов заказа
+        function showFiles(orderId) {
+            try {
+                const ordersData = JSON.parse(document.getElementById('orders-data').textContent);
+                const orderData = ordersData.find(o => o.order.id == orderId);
+
+                if (orderData && orderData.files && orderData.files.length > 0) {
+                    const filesListContainer = document.getElementById('filesListContainer');
+                    filesListContainer.innerHTML = orderData.files.map(file => `
+                        <a href="${file.url}" class="file-link" target="_blank" download>
+                            <i class="fas fa-file-download"></i> ${file.name} (${new Date(file.uploaded_at).toLocaleString()})
+                        </a>
+                    `).join('');
+
+                    document.getElementById('filesPopup').style.display = 'flex';
+                } else {
+                    alert('Нет прикрепленных файлов для этого заказа');
+                }
+            } catch (error) {
+                console.error('Error showing files:', error);
+                alert('Произошла ошибка при загрузке файлов');
+            }
+        }
+
+        // Закрытие попапа с файлами
+        function closeFilesPopup() {
+            document.getElementById('filesPopup').style.display = 'none';
+        }
+
+        // Закрытие попапа при клике вне его
+        window.addEventListener('click', function(event) {
+            const popup = document.getElementById('filesPopup');
+            if (event.target === popup) {
+                closeFilesPopup();
+            }
+        });
+    </script>
+</body>
+</html>

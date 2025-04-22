@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Register</title>
+    <link rel="stylesheet" href="{% static 'users/css/index.css' %}" type="text/css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="main">
+        <div class="fil"></div>
+        <div class="con">
+            <div class="messages">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-con">
+                    {% if error %}
+                    <div class="error-con" role="alert" aria-live="assertive">
+                        <i class="fas fa-exclamation-circle"></i>{{ error }}
+                    </div>
+                {% endif %}
+
+                    <label for="username">Введите имя пользователя</label>
+                    <input class="username" type="text" name="username" required>
+                    <label for="email">Почта</label>
+                    <input class="email" type="email" name="email" required>
+                    <label for="tel">Телефон</label>
+                    <input class="tel" type="tel" name="tel" required>
+                    <label for="password">Пароль</label>
+                    <input class="password" type="password" name="password" required>
+                    <label for="password_">Подтверждение пароля</label>
+                    <input class="password_" type="password" name="password_" required>
+                    <div class="but">
+
+                        <button class="reg" type="submit">Зарегистрироваться</button>
+                    </div>
+                </div>
+            </form>
+            <div class="log">
+                <a href="/users/login">Войти</a>
+            </div>
+            <div class="fil"></div>
+        </div>
+    </div>
+</body>
+</html>
