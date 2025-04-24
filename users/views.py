@@ -1,62 +1,17 @@
-from django.shortcuts import render, redirect
 import json
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import logout as auth_logout
 from .models import *
+from django.shortcuts import render
+from django.contrib.auth.models import User
 from django.contrib import messages
-
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from django.core.exceptions import ValidationError
-from django.utils import timezone
 from .models import Order, OrderFile
-def orders(request):
-    context = {}
-    if request.method == "POST":
-        category = request.POST.get('category')
-        contact = request.POST.get('contact')
-        name = request.POST.get('name')
-        suppliers = Suppliers()
-        suppliers.url = f"/users/orders/{name}/"
-        suppliers.name = name
-        suppliers.contact = contact
-        suppliers.category = category
-        suppliers.username = request.user.username
-        suppliers.save()
-
-    all_data = Suppliers.objects.filter(username=request.user.username)
-    context = {
-        "all_data": all_data,
-
-    }
-    return render(request, "users/orders.html", context)
-def user_login(request):
-    if request.method == "POST":
-        username = request.POST.get("username")
-        password = request.POST.get("password")
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            login(request, user)
-            return redirect("/users/account/")
-        else:
-            return render(request, "users/login.html", {"error": "Неправильный логин или пароль"})
-    return render(request, "users/login.html")
-def account(request):
-    contex = {}
-    if request.user.is_authenticated:
-        username = request.user.username
-
-        email = request.user.email
-        contex = {"username":username,
-                  "email":email}
-    else:
-        contex = {'anom':"User is not authenticated"}
-    return render(request, 'users/account.html', contex)
 from django.core.files.storage import default_storage
+from django.urls import reverse
+from django.shortcuts import get_object_or_404, redirect
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
-from django.contrib import messages
+from .models import Order
 
 def register(request):
     if request.method == 'POST':
@@ -89,6 +44,50 @@ def register(request):
 
     return render(request, 'users/register.html')
 
+def orders(request):
+    context = {}
+    if request.method == "POST":
+        category = request.POST.get('category')
+        contact = request.POST.get('contact')
+        name = request.POST.get('name')
+        suppliers = Suppliers()
+        suppliers.url = f"/users/orders/{name}/"
+        suppliers.name = name
+        suppliers.contact = contact
+        suppliers.category = category
+        suppliers.username = request.user.username
+        suppliers.save()
+
+    all_data = Suppliers.objects.filter(username=request.user.username)
+    context = {
+        "all_data": all_data,
+
+    }
+    return render(request, "users/orders.html", context)
+
+def user_login(request):
+    if request.method == "POST":
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return redirect("/users/account/")
+        else:
+            return render(request, "users/login.html", {"error": "Неправильный логин или пароль"})
+    return render(request, "users/login.html")
+
+def account(request):
+    contex = {}
+    if request.user.is_authenticated:
+        username = request.user.username
+
+        email = request.user.email
+        contex = {"username":username,
+                  "email":email}
+    else:
+        contex = {'anom':"User is not authenticated"}
+    return render(request, 'users/account.html', contex)
 
 @login_required
 def orders_profile(request, name):
@@ -165,6 +164,27 @@ def orders_profile(request, name):
     }
     return render(request, 'users/orders-profile.html', context)
 
+
+@login_required
+def delete_order(request, order_id):
+    order = get_object_or_404(
+        Order,
+        id=order_id,
+        username=request.user.username
+    )
+
+    for file in order.files.all():
+        file.file.delete()
+        file.delete()
+    order.delete()
+
+    next_url = request.META.get('HTTP_REFERER')
+    if next_url and url_has_allowed_host_and_scheme(
+        next_url,
+        allowed_hosts={request.get_host()}
+    ):
+        return redirect(next_url)
+    return redirect('users:orders')
 
 def logout(request):
     auth_logout(request)

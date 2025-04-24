@@ -1,5 +1,7 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.core.files.storage import default_storage
 
 class Images(models.Model):
     img = models.ImageField(upload_to='article', height_field=100, width_field=100)
@@ -15,10 +17,7 @@ class Suppliers(models.Model):
     category = models.CharField(max_length=40)
     url = models.TextField(default="None")
 
-from django.db import models
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-from django.core.files.storage import default_storage
+
 
 class Order(models.Model):
     username = models.TextField(default="None")

@@ -218,7 +218,7 @@
         .payment-оплачено, .payment-oplacheno {
             color: var(--primary);
         }
-        .payment-не-оплачено, .payment-ne-oplacheno {
+        .payment-Не-оплачено, .payment-ne-oplacheno {
             color: var(--error);
         }
         .payment-частично-оплачено, .payment-chastichno-oplacheno {
@@ -380,7 +380,7 @@
                 <button type="submit"><i class="fas fa-save"></i> Создать заказ</button>
             </form>
         </div>
-
+        <div id="result-container" style="margin-top: 20px;"></div>
         <div class="show-table">
             <table>
                 <thead>
@@ -393,6 +393,7 @@
                         <th><i class="fas fa-info-circle"></i> Статус</th>
                         <th><i class="fas fa-money-bill-wave"></i> Оплата</th>
                         <th><i class="fas fa-file"></i> Файл</th>
+                        <th>Действие</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -418,6 +419,11 @@
                             Нет файла
                             {% endif %}
                         </td>
+                        <td class="action-btns">
+                            <button onclick="confirmDelete({{ data.order.id }})" class="action-btn delete-btn">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
                     </tr>
                     {% empty %}
                     <tr>
@@ -438,28 +444,12 @@
         </div>
     </div>
 
-    <!-- Скрытый элемент с данными заказов -->
-    <script id="orders-data" type="application/json">
-        {{ orders_data_json|safe }}
-    </script>
-
     <script>
-        // Функция для получения CSRF токена
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
+            function confirmDelete(orderId) {
+                if (confirm('Вы уверены, что хотите удалить этот заказ?')) {
+                    window.location.href = `/users/order/del/${orderId}`;
                 }
             }
-            return cookieValue;
-        }
-
         // Управление формой
         function showOrderForm() {
             const orderForm = document.getElementById('orderForm');
@@ -562,19 +552,13 @@
         // Подтверждение удаления
         function confirmDelete(orderId) {
             if (confirm('Вы уверены, что хотите удалить этот заказ?')) {
-                deleteOrder(orderId);
+                window.location.href = `/users/orders/delete/${orderId}/`;
             }
-        }
-
-        // Редактирование заказа
-        function editOrder(orderId) {
-            console.log('Редактирование заказа:', orderId);
         }
 
         // Показ файлов заказа
         function showFiles(orderId) {
             try {
-                const ordersData = JSON.parse(document.getElementById('orders-data').textContent);
                 const orderData = ordersData.find(o => o.order.id == orderId);
 
                 if (orderData && orderData.files && orderData.files.length > 0) {

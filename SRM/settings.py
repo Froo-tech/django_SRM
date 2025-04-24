@@ -41,11 +41,10 @@ INSTALLED_APPS = [
     'users',
     'sr',
 ]
-# Настройки для медиа-файлов
+
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 
-# Для production добавьте:
 DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
