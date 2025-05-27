@@ -3,8 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <title>Данные поставщиков</title>
     <style>
+        :root {
+            --primary: #5cb85c;
+            --secondary: #f0ad4e;
+            --background: #f5f5f5;
+        }
+        .delete-btn {
+            background: #ffffff;
+            color: var(--error);
+        }
         body {
             font-family: Arial, sans-serif;
             line-height: 1.6;
@@ -34,6 +44,7 @@
         table {
             width: 100%;
             border-collapse: collapse;
+
         }
         table th, table td {
             padding: 12px 15px;
@@ -41,9 +52,11 @@
             border-bottom: 1px solid #ddd;
         }
         table th {
-            background-color: #f2f2f2;
+
+            background-color: var(--primary);
+            color: #ffffff;
             font-weight: bold;
-            color: #333;
+
         }
         table tr:hover {
             background-color: #f5f5f5;
@@ -73,6 +86,22 @@
             flex-direction: column;
             gap: 3px;
         }
+        #searchInput {
+            width: 100%;
+            padding: 12px 20px;
+            margin: 15px 0;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        #searchInput:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(92, 184, 92, 0.2);
+        }
         .contact-info span {
             font-size: 0.9em;
             color: #666;
@@ -84,6 +113,7 @@
         <h2>Данные поставщиков</h2>
 
         <div class="show-table">
+            <input type="text" id="searchInput" placeholder="Поиск по номеру, имени поставщика или категории" onkeyup="searchTable()">
             <table>
                 <thead>
                     <tr>
@@ -91,6 +121,7 @@
                         <th>Контакт</th>
                         <th>Категория</th>
                         <th>Все заказы поставщика</th>
+                        <th>Действие</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -108,6 +139,11 @@
                             {{ data.category }}
                         </td>
                         <td><a href="{{ data.url }}">Перейти к заказам</a></td>
+                        <td class="action-btns">
+                            <button onclick="confirmDelete({{ data.id }})" class="action-btn delete-btn">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -115,4 +151,42 @@
         </div>
     </div>
 </body>
+<script>
+
+    function confirmDelete(supplierId) {
+        if (confirm('Вы уверены, что хотите удалить этого поставщика?')) {
+            window.location.href = `/users/orders/delete_supplier/${supplierId}/`;
+        }
+    }
+    function searchTable() {
+        // Получаем значение поиска
+        const input = document.getElementById("searchInput");
+        const filter = input.value.toLowerCase();
+
+        // Получаем таблицу и строки
+        const table = document.querySelector("table");
+        const trs = table.getElementsByTagName("tr");
+
+        // Перебираем все строки таблицы, кроме заголовка
+        for (let i = 1; i < trs.length; i++) {
+            const tds = trs[i].getElementsByTagName("td");
+            let showRow = false;
+
+            // Проверяем каждую ячейку в строке
+            for(let j = 0; j < tds.length; j++) {
+                const td = tds[j];
+                if (td) {
+                    const txtValue = td.textContent || td.innerText;
+                    if (txtValue.toLowerCase().indexOf(filter) > -1) {
+                        showRow = true;
+                        break;
+                    }
+                }
+            }
+
+            // Показываем/скрываем строку
+            trs[i].style.display = showRow ? "" : "none";
+        }
+    }
+</script>
 </html>

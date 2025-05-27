@@ -1,3 +1,12 @@
+
+
+
+
+
+
+
+
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -279,6 +288,22 @@
             max-height: 80vh;
             overflow-y: auto;
         }
+        #searchInput {
+            width: 100%;
+            padding: 12px 20px;
+            margin: 15px 0;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        #searchInput:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(92, 184, 92, 0.2);
+        }
 
         .files-list {
             margin-top: 15px;
@@ -305,6 +330,7 @@
             font-size: 20px;
         }
 
+
         @media (max-width: 768px) {
             .container {
                 padding: 20px;
@@ -319,6 +345,27 @@
     </style>
 </head>
 <body>
+<footer>
+    <nav>
+        <div class="navbar">
+            <div class="container nav-container">
+                <input class="checkbox" type="checkbox" name="" id="" />
+                <div class="hamburger-lines">
+                    <span class="line line1"></span>
+                    <span class="line line2"></span>
+                    <span class="line line3"></span>
+                </div>
+                <div class="menu-items">
+                    <li><a href="/">Главная</a></li>
+                    <li><a href="/users/login">Вход</a></li>
+                    <li><a href="/users/register">Регистрация</a></li>
+                    <li><a href="/tasks">Задачи</a></li>
+                    <li><a href="/users/account">Аккаунт</a></li>
+                </div>
+            </div>
+        </div>
+    </nav>
+</footer>
     <div class="container">
         <h1><i class="fas fa-clipboard-list"></i> Управление заказами</h1>
 
@@ -382,6 +429,7 @@
         </div>
         <div id="result-container" style="margin-top: 20px;"></div>
         <div class="show-table">
+            <input type="text" id="searchInput" placeholder="Поиск по дате, имени поставщика или статусу заказа" onkeyup="searchTable()">
             <table>
                 <thead>
                     <tr>
@@ -478,6 +526,36 @@
                 </div>
             `).join('');
         }
+            function searchTable() {
+                // Получаем значение поиска
+                const input = document.getElementById("searchInput");
+                const filter = input.value.toLowerCase();
+
+                // Получаем таблицу и строки
+                const table = document.querySelector("table");
+                const trs = table.getElementsByTagName("tr");
+
+                // Перебираем все строки таблицы, кроме заголовка
+                for (let i = 1; i < trs.length; i++) {
+                    const tds = trs[i].getElementsByTagName("td");
+                    let showRow = false;
+
+                    // Проверяем каждую ячейку в строке
+                    for(let j = 0; j < tds.length; j++) {
+                        const td = tds[j];
+                        if (td) {
+                            const txtValue = td.textContent || td.innerText;
+                            if (txtValue.toLowerCase().indexOf(filter) > -1) {
+                                showRow = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    // Показываем/скрываем строку
+                    trs[i].style.display = showRow ? "" : "none";
+                }
+            }
 
         function removeFile(index) {
             files.splice(index, 1);

@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import user_login, register, account, logout, orders, orders_profile, main, delete_order
+from .views import user_login, register, account, logout, orders, orders_profile, main, delete_order, delete_suppliers
 
 app_name = 'users'
 urlpatterns = [
@@ -10,5 +10,6 @@ urlpatterns = [
     path('orders/', orders, name='orders'),
     path('orders/<str:name>/', orders_profile, name='orders_profile'),
     path('orders/delete/<int:order_id>/', delete_order, name='delete_order'),
+    path('orders/delete_supplier/<int:supplier_id>/', delete_suppliers, name='delete_suppliers'),
     path('', main),
 ]

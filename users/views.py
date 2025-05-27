@@ -3,15 +3,25 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth import logout as auth_logout
 from .models import *
 from django.shortcuts import render
+from django.http import HttpResponseForbidden
 from django.contrib.auth.models import User
 from django.contrib import messages
 from .models import Order, OrderFile
 from django.core.files.storage import default_storage
-from django.urls import reverse
 from django.shortcuts import get_object_or_404, redirect
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.contrib.auth.decorators import login_required
 from .models import Order
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    filename='app.log',
+    filemode='a'
+)
+
+logger = logging.getLogger(__name__)
 
 def register(request):
     if request.method == 'POST':
@@ -20,22 +30,26 @@ def register(request):
         tel = request.POST.get('tel')
         password = request.POST.get('password')
         password_confirm = request.POST.get('password_')
+        logger.info(f"Data was successfully received for register:{username}")
 
 
         if password != password_confirm:
-
+            logger.info(f"Please enter the same password:{username}")
             return render(request, 'users/register.html',{"error" : "Пожалуйста введите одинаковый пароль"})
 
         if User.objects.filter(username=username).exists():
-            return render(request, 'users/register.html', {"error" : "Пользователь с таким username уже сушествует "})
+            logger.info(f"A user with this username already exists:{username}")
+            return render(request, 'users/register.html', {"error" : "Пользователь с таким username уже существует "})
 
         if User.objects.filter(email=email).exists():
-            return render(request, 'users/register.html', {"error" : "Пользователь с таким email уже сушествует"})
+            logger.info(f"The user with this email already exists:{username}")
+            return render(request, 'users/register.html', {"error" : "Пользователь с таким email уже существует"})
 
 
         try:
             user = User.objects.create_user(username=username, email=email, password=password)
             login(request, user)
+            logger.info(f"User has been successfully registered:{username}")
             return redirect('/users/account/')
 
 
@@ -57,7 +71,7 @@ def orders(request):
         suppliers.category = category
         suppliers.username = request.user.username
         suppliers.save()
-
+        logger.info(f"Data was successfully received for orders:{request.user.username}")
     all_data = Suppliers.objects.filter(username=request.user.username)
     context = {
         "all_data": all_data,
@@ -74,6 +88,7 @@ def user_login(request):
             login(request, user)
             return redirect("/users/account/")
         else:
+            logger.warning(f"Incorrect username or password: {username}")
             return render(request, "users/login.html", {"error": "Неправильный логин или пароль"})
     return render(request, "users/login.html")
 
@@ -86,6 +101,7 @@ def account(request):
         contex = {"username":username,
                   "email":email}
     else:
+        logger.info('User is not authenticated')
         contex = {'anom':"User is not authenticated"}
     return render(request, 'users/account.html', contex)
 
@@ -103,11 +119,12 @@ def orders_profile(request, name):
                 order_type=request.POST.get('order_type')
             )
             order.save()
+            logger.info(f"Data was successfully received for create order:{request.user.username}")
 
             files = request.FILES.getlist('files')
             for file in files:
                 OrderFile.objects.create(order=order, file=file)
-
+            logger.info('The order was successfully created')
             messages.success(request, 'Заказ успешно создан')
             return redirect('users:orders_profile', name=name)
 
@@ -156,11 +173,11 @@ def orders_profile(request, name):
             'files': [{
                 'url': file['url'],
                 'name': file['name'],
-                'uploaded_at': file['uploaded_at'].strftime('%Y-%m-%d %H:%M:%S')  # Convert datetime to string
+                'uploaded_at': file['uploaded_at'].strftime('%Y-%m-%d %H:%M:%S')
             } for file in data['files']],
             'main_file_url': data['main_file_url'],
             'main_file_name': data['main_file_name']
-        } for data in orders_data], default=str)  # Added default=str as fallback
+        } for data in orders_data], default=str)
     }
     return render(request, 'users/orders-profile.html', context)
 
@@ -177,6 +194,7 @@ def delete_order(request, order_id):
         file.file.delete()
         file.delete()
     order.delete()
+    logger.info(f'The order was successfully deleted:{order_id}')
 
     next_url = request.META.get('HTTP_REFERER')
     if next_url and url_has_allowed_host_and_scheme(
@@ -186,9 +204,21 @@ def delete_order(request, order_id):
         return redirect(next_url)
     return redirect('users:orders')
 
+@login_required
+def delete_suppliers(request, supplier_id):
+    supplier = get_object_or_404(Suppliers, id=supplier_id)
+    if supplier.username != request.user.username:
+        return HttpResponseForbidden()
+    supplier.delete()
+    logger.info(f'The suppliers was successfully deleted:{supplier_id}')
+
+    return redirect(request.META.get('HTTP_REFERER', 'users:orders'))
+
 def logout(request):
+    logger.info(f'The user logged out of the account{request.user.username}')
     auth_logout(request)
     return redirect('/users/login/')
 
 def main(request):
     return render(request, 'users/main-page.html')
+
