@@ -6,3 +6,6 @@ def tasks(request):
     return render(request, 'sr/task.html')
 def analytics(request):
     return render(request, 'sr/create_analytics.html')
+
+def show_analytics(request):
+    return render(request, 'sr/show_analytics.html')

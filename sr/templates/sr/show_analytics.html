@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Аналитика</title>
+    <script src="https://cdn.anychart.com/releases/8.11.0/js/anychart-core.min.js"></script>
+    <script src="https://cdn.anychart.com/releases/8.11.0/js/anychart-pie.min.js"></script>
+    <style>
+
+        :root {
+            --primary: #5cb85c;
+            --secondary: #f0ad4e;
+            --background: #f5f5f5;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: var(--background);
+        }
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            color: white;
+            z-index: 1000;
+        }
+
+        .notification.success {
+            background: #5cb85c;
+        }
+
+        .notification.error {
+            background: #d9534f;
+        }
+
+        .total-sales {
+            margin: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            font-weight: bold;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 30px;
+        }
+
+        .sales-form {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+        @import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Poppins", sans-serif;
+        }
+
+        .container {
+            max-width: 1050px;
+            width: 90%;
+            margin: auto;
+        }
+
+        .navbar {
+            width: 100%;
+            margin: 10px;
+            box-shadow: 0 1px 4px rgb(146 161 176 / 15%);
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 62px;
+        }
+
+        .navbar .menu-items {
+            display: flex;
+        }
+
+        .navbar .nav-container li {
+            list-style: none;
+        }
+
+        .navbar .nav-container a {
+            text-decoration: none;
+            color: #0e2431;
+            font-weight: 500;
+            font-size: 1.2rem;
+            padding: 0.7rem;
+        }
+
+        .navbar .nav-container a:hover{
+            font-weight: bolder;
+        }
+
+        .nav-container {
+            display: block;
+            position: relative;
+            height: 60px;
+        }
+
+        .nav-container .checkbox {
+            position: absolute;
+            display: block;
+            height: 32px;
+            width: 32px;
+            top: 20px;
+            left: 20px;
+            z-index: 5;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .nav-container .hamburger-lines {
+            display: block;
+            height: 26px;
+            width: 32px;
+            position: absolute;
+            top: 17px;
+            left: 20px;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .nav-container .hamburger-lines .line {
+            display: block;
+            height: 4px;
+            width: 100%;
+            border-radius: 10px;
+            background: #0e2431;
+        }
+
+        .nav-container .hamburger-lines .line1 {
+            transform-origin: 0% 0%;
+            transition: transform 0.4s ease-in-out;
+        }
+
+        .nav-container .hamburger-lines .line2 {
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .nav-container .hamburger-lines .line3 {
+            transform-origin: 0% 100%;
+            transition: transform 0.4s ease-in-out;
+        }
+
+        .navbar .menu-items {
+            padding-top: 120px;
+            box-shadow: inset 0 0 2000px rgba(255, 255, 255, .5);
+            height: 100vh;
+            width: 100%;
+            transform: translate(-150%);
+            display: flex;
+            flex-direction: column;
+            margin-left: -40px;
+            padding-left: 50px;
+            transition: transform 0.5s ease-in-out;
+            text-align: center;
+        }
+
+        .navbar .menu-items li {
+            margin-bottom: 1.2rem;
+            font-size: 1.5rem;
+            font-weight: 500;
+        }
+
+        .logo {
+            position: absolute;
+            top: 5px;
+            right: 15px;
+            font-size: 1.2rem;
+            color: #0e2431;
+        }
+
+        .nav-container input[type="checkbox"]:checked ~ .menu-items {
+            transform: translateX(0);
+        }
+
+        .nav-container input[type="checkbox"]:checked ~ .hamburger-lines .line1 {
+            transform: rotate(45deg);
+        }
+
+        .nav-container input[type="checkbox"]:checked ~ .hamburger-lines .line2 {
+            transform: scaleY(0);
+        }
+
+        .nav-container input[type="checkbox"]:checked ~ .hamburger-lines .line3 {
+            transform: rotate(-45deg);
+        }
+
+        .nav-container input[type="checkbox"]:checked ~ .logo{
+            display: none;
+        }
+        .navbar {
+            background-color: #777777; /* Зеленый цвет из вашей палитры */
+            box-shadow: 0 1px 4px rgb(146 161 176 / 15%);
+            border-radius: 10px;
+        }
+
+        .navbar .nav-container a {
+            color: white !important; /* Белый цвет текста */
+            transition: all 0.3s ease;
+        }
+
+        .navbar .nav-container a:hover {
+            color: #e0ffe0 !important; /* Светло-зеленый при наведении */
+            transform: translateX(5px);
+        }
+
+        .nav-container .hamburger-lines .line {
+            background: white; /* Белый цвет иконки меню */
+        }
+
+        .navbar .menu-items {
+            background-color: var(--primary); /* Зеленый фон для мобильного меню */
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .sales-list {
+            margin-top: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        #chartContainer {
+            height: 400px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+<nav>
+    <div class="navbar">
+        <div class="container nav-container">
+            <input class="checkbox" type="checkbox" name="" id="" />
+            <div class="hamburger-lines">
+                <span class="line line1"></span>
+                <span class="line line2"></span>
+                <span class="line line3"></span>
+            </div>
+            <div class="menu-items">
+                <li><a href="/">Главная</a></li>
+                <li><a href="/users/login">Вход</a></li>
+                <li><a href="/users/register">Регистрация</a></li>
+                <li><a href="/tasks">Задачи</a></li>
+                <li><a href="/users/account">Аккаунт</a></li>
+            </div>
+        </div>
+    </div>
+</nav>
+    <div class="container">
+        <div class="sales-form">
+            <h2>Добавить продажу</h2>
+            <form id="salesForm">
+                <div class="form-group">
+                    <label>Тип товара:</label>
+                    <select id="productType" required>
+                        <option value="">Выберите тип</option>
+                        <option value="Вода">Вода</option>
+                        <option value="Напитки">Напитки</option>
+                        <option value="Еда">Еда</option>
+                        <option value="Прочее">Прочее</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Цена (руб):</label>
+                    <input type="number" id="price" step="0.01" min="0" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Количество:</label>
+                    <input type="number" id="quantity" min="1" required>
+                </div>
+
+                <button type="submit">Добавить продажу</button>
+            </form>
+        </div>
+
+        <div class="sales-list">
+            <h2>Статистика продаж</h2>
+            <div id="chartContainer"></div>
+
+            <h3>История продаж</h3>
+            <table id="salesTable">
+                <thead>
+                    <tr>
+                        <th>Тип</th>
+                        <th>Цена</th>
+                        <th>Количество</th>
+                        <th>Сумма</th>
+                    </tr>
+                </thead>
+                <tbody id="salesBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+            let salesData = [];
+            let chartInstance = null; // Храним экземпляр диаграммы
+
+            document.getElementById('salesForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const productType = document.getElementById('productType').value;
+            const price = parseFloat(document.getElementById('price').value);
+            const quantity = parseInt(document.getElementById('quantity').value);
+
+            const sale = {
+            type: productType,
+            price: price,
+            quantity: quantity,
+            total: price * quantity,
+            date: new Date().toLocaleString()
+        };
+
+            salesData.push(sale);
+            updateSalesTable();
+            updateChart();
+            this.reset();
+        });
+
+            function updateSalesTable() {
+            const tbody = document.getElementById('salesBody');
+            tbody.innerHTML = '';
+
+            salesData.forEach(sale => {
+            const row = `
+                <tr>
+                    <td>${sale.type}</td>
+                    <td>${sale.price.toFixed(2)} руб</td>
+                    <td>${sale.quantity}</td>
+                    <td>${sale.total.toFixed(2)} руб</td>
+                </tr>
+            `;
+            tbody.innerHTML += row;
+        });
+        }
+
+            function updateChart() {
+            const chartData = salesData.reduce((acc, sale) => {
+            acc[sale.type] = (acc[sale.type] || 0) + sale.total;
+            return acc;
+        }, {});
+
+            const data = Object.keys(chartData).map(type => ({
+            x: type,
+            value: chartData[type]
+        }));
+
+            // Удаляем предыдущую диаграмму
+            if(chartInstance) {
+            chartInstance.dispose();
+        }
+
+            // Создаем новую диаграмму
+            chartInstance = anychart.pie();
+            chartInstance.title('Продажи по категориям');
+            chartInstance.data(data);
+            chartInstance.container('chartContainer');
+            chartInstance.draw();
+        }
+    </script>
+    </script>
+</body>
+</html>

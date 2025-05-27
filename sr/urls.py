@@ -6,7 +6,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('tasks/', tasks),
     path('analytics/', analytics),
-
+    path('analytics/voda/', show_analytics),
     path('', index),
 
 ]
